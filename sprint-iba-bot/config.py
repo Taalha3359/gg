@@ -1,5 +1,5 @@
 # Bot token from Discord Developer Portal
-BOT_TOKEN = "MTQxMDkzMjQzNTcwODkzNjIwMg.G7XYxz.prl5D1eAUZWeOw-v5boxNC7VdEm_NMx-JC06vQ"
+BOT_TOKEN = os.getenv('BOT_TOKEN')
 
 # Bot prefix for commands
 BOT_PREFIX = "!"
@@ -51,4 +51,5 @@ ENGLISH_TOPICS = [
 # Analytical topics (must match your folder names)
 ANALYTICAL_TOPICS = [
     "cr", "ds", "puzzle"
+
 ]
