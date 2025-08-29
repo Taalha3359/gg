@@ -7,10 +7,72 @@ import random
 import json
 from datetime import datetime, timedelta
 
+# Import config - will be created by GitHub Actions
 import config
-from utils.database import UserDatabase
-from utils.question_manager import QuestionManager
-from utils.leaderboard import Leaderboard
+
+# Simple database functions
+def get_user(user_id):
+    try:
+        with open('data/users.json', 'r') as f:
+            data = json.load(f)
+            return data.get(str(user_id))
+    except:
+        return None
+
+def create_user(user_id):
+    try:
+        with open('data/users.json', 'r') as f:
+            data = json.load(f)
+    except:
+        data = {}
+    
+    user_data = {
+        'total_score': 0,
+        'math': {'correct': 0, 'total': 0, 'topics': {}},
+        'english': {'correct': 0, 'total': 0, 'topics': {}},
+        'analytical': {'correct': 0, 'total': 0, 'topics': {}}
+    }
+    data[str(user_id)] = user_data
+    
+    os.makedirs('data', exist_ok=True)
+    with open('data/users.json', 'w') as f:
+        json.dump(data, f, indent=2)
+    
+    return user_data
+
+def update_user(user_id, user_data):
+    try:
+        with open('data/users.json', 'r') as f:
+            data = json.load(f)
+    except:
+        data = {}
+    
+    data[str(user_id)] = user_data
+    
+    with open('data/users.json', 'w') as f:
+        json.dump(data, f, indent=2)
+
+# Simple question loader
+def load_questions(subject, topic):
+    questions = []
+    topic_path = os.path.join(config.IMAGE_PATHS[subject], topic)
+    
+    # Load from JSON if exists
+    json_path = os.path.join(topic_path, 'questions.json')
+    if os.path.exists(json_path):
+        try:
+            with open(json_path, 'r') as f:
+                questions = json.load(f)
+        except:
+            pass
+    
+    return questions
+
+def get_question(subject, topic):
+    questions = load_questions(subject, topic)
+    if not questions:
+        return None
+    return random.choice(questions)
 
 # Setup bot
 intents = discord.Intents.default()
@@ -18,11 +80,6 @@ intents.message_content = True
 intents.members = True
 
 bot = commands.Bot(command_prefix=config.BOT_PREFIX, intents=intents)
-
-# Initialize components
-db = UserDatabase()
-qm = QuestionManager()
-lb = Leaderboard()
 
 # Store active questions
 active_questions = {}
